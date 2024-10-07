@@ -13,6 +13,8 @@ class otpButtonClick extends StatefulWidget {
 class _otpButtonClickState extends State<otpButtonClick> {
   String _otp='';
   Timer? otpValidTime;
+  Timer? countdown;
+  int countdownValue =0;
   late bool _isDisabled= false;
 
   // Secret key used to generate the OTP (normally you'd want this to be kept secret)
@@ -21,24 +23,35 @@ class _otpButtonClickState extends State<otpButtonClick> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
   }
   @override
-
+  void timer() {
+    countdown = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      setState(() {
+        countdownValue++;
+      });
+    });
+  }
   void _generateOtp() {
+    timer();
     setState(() {
+
       _otp = OTP.generateTOTPCodeString(
         _secret,
         DateTime.now().millisecondsSinceEpoch,
         interval: 10,
         length: 6,
       );
+
       _isDisabled=true;
     });
 
     otpValidTime?.cancel();
     otpValidTime=Timer(Duration(seconds: 10), () {setState(() {
       _isDisabled=false;
-      print("object");
+      countdownValue=0;
+      countdown?.cancel();
     });
     });
   }
@@ -51,6 +64,7 @@ class _otpButtonClickState extends State<otpButtonClick> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.greenAccent,
         title: const Text('OTP Generator'),
       ),
       body: Center(
@@ -68,9 +82,41 @@ class _otpButtonClickState extends State<otpButtonClick> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isDisabled? null:_generateOtp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isDisabled
+                    ? Colors.grey
+                    : Colors.greenAccent, // Button color
+              ),
+              onPressed: _isDisabled? null:()
+              {_generateOtp();
+
+                },
               child: Text("Generate otp"),
-            )
+            ),
+            SizedBox(
+              height: 190,
+            ),
+            Center(
+              child: Container(
+                width: 500,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.greenAccent,width: 7),
+                    shape: BoxShape.circle
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(48.0),
+                      child: Text(
+                        "  $countdownValue  " ,
+                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

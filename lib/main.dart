@@ -34,6 +34,7 @@ class _otpMenuState extends State<otpMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.greenAccent,
         title: const Text('OTP Generator'),
       ),
       body: Center(
